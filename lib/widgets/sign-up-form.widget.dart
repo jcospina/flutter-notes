@@ -35,11 +35,13 @@ class _SignUpFormState extends State<SignUpForm> {
           SignUpTextFormField(
             icon: Icon(Icons.email),
             placeholder: 'Email',
+            inputType: TextInputType.emailAddress,
             gap: 15.0,
           ),
           SignUpTextFormField(
             icon: Icon(Icons.vpn_key),
             placeholder: 'Password',
+            obscureText: true,
             gap: 15.0,
           ),
           Visibility(
@@ -91,12 +93,16 @@ class SignUpTextFormField extends StatelessWidget {
   final Icon icon;
   final String placeholder;
   final double gap;
+  final TextInputType inputType;
+  final bool obscureText;
 
   SignUpTextFormField({
     this.visible = true,
     this.icon,
     this.placeholder,
     this.gap,
+    this.inputType = TextInputType.text,
+    this.obscureText = false,
   });
 
   @override
@@ -114,7 +120,8 @@ class SignUpTextFormField extends StatelessWidget {
                     prefixIcon: icon,
                     labelText: placeholder,
                   ),
-                  keyboardType: TextInputType.emailAddress,
+                  keyboardType: inputType,
+                  obscureText: obscureText,
                 ),
                 SizedBox(
                   height: gap,

@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_notes/model/app.model.dart';
@@ -15,10 +16,12 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   FormType formType = FormType.LOGIN;
   String submitLabel = 'Login';
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: SafeArea(
+        bottom: false,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
@@ -29,7 +32,10 @@ class _LoginScreenState extends State<LoginScreen> {
               child: SignUpForm(
                 formType: formType,
                 submitLabel: submitLabel,
-                onSubmit: () {},
+                onSubmit: () {
+                  FirebaseFirestore store = FirebaseFirestore.instance;
+                  store.collection('test').add({'name': 'juan'});
+                },
                 onChangeForm: () {
                   setState(() {
                     formType = formType == FormType.LOGIN
