@@ -1,8 +1,12 @@
+import 'package:email_validator/email_validator.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flushbar/flushbar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_notes/model/app.model.dart';
+import 'package:flutter_notes/services/services.dart';
 import 'package:flutter_notes/utils/constants.dart';
-import 'package:flutter_notes/widgets/link.widget.dart';
-import 'package:flutter_notes/widgets/rounded-button.widget.dart';
+import 'package:flutter_notes/widgets/widgets.dart';
+import 'package:provider/provider.dart';
 
 class SignUpForm extends StatefulWidget {
   final FormType formType;
@@ -10,8 +14,13 @@ class SignUpForm extends StatefulWidget {
   final VoidCallback onSubmit;
   final VoidCallback onChangeForm;
 
-  SignUpForm(
-      {this.formType, this.submitLabel, this.onSubmit, this.onChangeForm});
+  SignUpForm({
+    this.formType,
+    this.submitLabel,
+    this.onSubmit,
+    this.onChangeForm,
+  });
+
   @override
   _SignUpFormState createState() => _SignUpFormState();
 }
@@ -21,6 +30,9 @@ class _SignUpFormState extends State<SignUpForm> {
 
   @override
   Widget build(BuildContext context) {
+    String name = '';
+    String email = '';
+    String password = '';
     return Form(
       key: _formKey,
       child: Column(
@@ -31,18 +43,38 @@ class _SignUpFormState extends State<SignUpForm> {
             icon: Icon(Icons.person),
             placeholder: 'Name',
             gap: 15.0,
+            validator: (String value) {
+              return value.isEmpty ? 'Please enter your name' : null;
+            },
+            onChange: (String newValue) {
+              name = newValue;
+            },
           ),
           SignUpTextFormField(
             icon: Icon(Icons.email),
             placeholder: 'Email',
             inputType: TextInputType.emailAddress,
             gap: 15.0,
+            validator: (String value) {
+              return EmailValidator.validate(value)
+                  ? null
+                  : 'Please enter a valid email';
+            },
+            onChange: (String newValue) {
+              email = newValue;
+            },
           ),
           SignUpTextFormField(
             icon: Icon(Icons.vpn_key),
             placeholder: 'Password',
             obscureText: true,
             gap: 15.0,
+            validator: (String value) {
+              return value.isEmpty ? 'Password cannot be empty' : null;
+            },
+            onChange: (String newValue) {
+              password = newValue;
+            },
           ),
           Visibility(
             visible: widget.formType == FormType.LOGIN,
@@ -58,7 +90,40 @@ class _SignUpFormState extends State<SignUpForm> {
           ),
           RoundedButton(
             label: widget.submitLabel,
-            onPressed: widget.onSubmit,
+            onPressed: () async {
+              if (_formKey.currentState.validate()) {
+                context.read<NoteAppState>().setLoginState(true);
+                try {
+                  if (widget.formType == FormType.REGISTER) {
+                    await AuthService().registerUser(name, email, password);
+                  } else {
+                    await AuthService().login(email, password);
+                  }
+                } on FirebaseAuthException catch (e) {
+                  Flushbar(
+                    messageText: Text(
+                      ErrorHandler().getAuthErrorMessage(e),
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 16.0,
+                      ),
+                    ),
+                    icon: Icon(
+                      Icons.warning,
+                      color: Theme.of(context).primaryColor,
+                    ),
+                    duration: Duration(seconds: 5),
+                    isDismissible: true,
+                    flushbarStyle: FlushbarStyle.GROUNDED,
+                    flushbarPosition: FlushbarPosition.TOP,
+                    shouldIconPulse: false,
+                    boxShadows: kElevationToShadow[8],
+                  )..show(context);
+                } finally {
+                  context.read<NoteAppState>().setLoginState(false);
+                }
+              }
+            },
             color: Theme.of(context).primaryColor,
           ),
           Padding(
@@ -95,6 +160,8 @@ class SignUpTextFormField extends StatelessWidget {
   final double gap;
   final TextInputType inputType;
   final bool obscureText;
+  final Function validator;
+  final Function onChange;
 
   SignUpTextFormField({
     this.visible = true,
@@ -103,6 +170,8 @@ class SignUpTextFormField extends StatelessWidget {
     this.gap,
     this.inputType = TextInputType.text,
     this.obscureText = false,
+    this.validator,
+    this.onChange,
   });
 
   @override
@@ -122,6 +191,8 @@ class SignUpTextFormField extends StatelessWidget {
                   ),
                   keyboardType: inputType,
                   obscureText: obscureText,
+                  validator: validator,
+                  onChanged: onChange,
                 ),
                 SizedBox(
                   height: gap,

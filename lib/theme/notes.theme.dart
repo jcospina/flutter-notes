@@ -14,19 +14,30 @@ ThemeData buildNotesTheme() {
       filled: true,
       fillColor: Colors.white,
       labelStyle: kPlaceHolderStyle,
-      focusedBorder: OutlineInputBorder(
+      focusedBorder: getOutlineInputBorder(8.0).copyWith(
+        gapPadding: 4.0,
+      ),
+      errorBorder: getOutlineInputBorder(20.0).copyWith(
         borderSide: BorderSide(
           color: kPrimary,
         ),
-        borderRadius: BorderRadius.circular(8.0),
-        gapPadding: 4.0,
       ),
-      enabledBorder: OutlineInputBorder(
+      focusedErrorBorder: getOutlineInputBorder(20.0).copyWith(
         borderSide: BorderSide(
-          color: kBaseTextColorLight,
+          color: kPrimary,
+          width: 2,
         ),
-        borderRadius: BorderRadius.circular(20.0),
       ),
+      enabledBorder: getOutlineInputBorder(20.0),
     ),
+  );
+}
+
+OutlineInputBorder getOutlineInputBorder(double radius) {
+  return OutlineInputBorder(
+    borderSide: BorderSide(
+      color: kBaseTextColorLight,
+    ),
+    borderRadius: BorderRadius.circular(radius),
   );
 }

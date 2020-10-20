@@ -1,6 +1,8 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
+final formKey = GlobalKey<FormState>();
+
 Color kBaseTextColor = Color(0xFF535353);
 Color kBaseTextColorLight = kBaseTextColor.withOpacity(0.5);
 Color kBGColor = Color(0xFFfff7f3);
